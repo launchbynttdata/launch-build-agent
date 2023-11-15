@@ -21,7 +21,7 @@ REPO_MANIFESTS_URL ?= https://github.com/nexient-llc/common-automation-framework
 # TODO: replace with git tag when supported
 REPO_BRANCH ?= main
 # Path to seed manifest in repository referenced in REPO_MANIFESTS_URL
-REPO_MANIFEST ?= manifests/terraform_modules/seed/manifest.xml
+REPO_MANIFEST ?= manifests/containers/aws/build_agents/shared_service/terraform/seed/manifest.xml
 
 # Settings to pull in Nexient version of (google) repo utility that supports environment substitution:
 REPO_URL ?= https://github.com/nexient-llc/git-repo.git
@@ -49,7 +49,7 @@ COMPONENTS_DIR = components
 
 .PHONY: configure-git-hooks
 configure-git-hooks:
-	pre-commit install
+	-pre-commit install
 
 ifeq ($(IS_PIPELINE),true)
 .PHONY: git-config
@@ -69,7 +69,6 @@ git-auth:
 
 define config
 	@set -ex; \
-	git config --global http.extraheader "AUTHORIZATION: $(1)"; \
 	git config --global http.https://gerrit.googlesource.com/git-repo/.extraheader ''; \
 	git config --global http.version HTTP/1.1;
 endef
