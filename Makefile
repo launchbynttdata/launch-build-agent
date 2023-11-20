@@ -32,9 +32,11 @@ export REPO_REV REPO_URL
 
 # Example variable to substituted after init, but before sync in repo manifests.
 GITBASE ?= https://github.com/nexient-llc/
-# TODO: replace with git tag when supported
 GITREV ?= main
 export GITBASE GITREV
+
+# Include project level defaults (env vars, etc.)
+-include Makefile.includes
 
 # Set to true in a pipeline context
 IS_PIPELINE ?= false
@@ -46,6 +48,8 @@ JOB_EMAIL ?= job@job.job
 
 COMPONENTS_DIR = components
 -include $(COMPONENTS_DIR)/Makefile
+
+MODULE_DIR ?= ${COMPONENTS_DIR}/module
 
 .PHONY: configure-git-hooks
 configure-git-hooks:
@@ -77,7 +81,7 @@ configure: git-auth
 endif
 
 .PHONY: configure
-configure: configure-git-hooks
+configure:
 	repo --color=never init --no-repo-verify \
 		-u "$(REPO_MANIFESTS_URL)" \
 		-b "$(REPO_BRANCH)" \

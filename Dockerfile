@@ -32,22 +32,11 @@ FROM core AS tools
 RUN rm -fr /tmp/* /var/tmp/*
 
 # Python
-ENV PYTHON_VERSION="3.9.16"
-ENV PYTHON_PIP_VERSION=21.3.1
-ENV PYYAML_VERSION=5.4.1
-
-COPY tools/python/$PYTHON_VERSION /root/.pyenv/plugins/python-build/share/python-build/$PYTHON_VERSION
-RUN env PYTHON_CONFIGURE_OPTS="--enable-shared --with-openssl=/usr/include/openssl" pyenv install $PYTHON_VERSION && rm -rf /tmp/*
-RUN pyenv global  $PYTHON_VERSION
 RUN set -ex \
-    && pip3 install --no-cache-dir --upgrade --force-reinstall "pip==$PYTHON_PIP_VERSION" \
-    && pip3 install --no-cache-dir --upgrade "PyYAML==$PYYAML_VERSION" \
-    && pip3 install --no-cache-dir --upgrade 'setuptools==57.5.0' wheel awscli
+    && pip3 install --no-cache-dir --upgrade --force-reinstall pip \
+    && pip3 install --no-cache-dir --upgrade PyYAML setuptools wheel awscli pre-commit
 
-ARG TOOLS_DIR="/usr/local/opt"
-
-ENV TOOLS_DIR="${TOOLS_DIR}" \
-    BUILD_ACTIONS_DIR="${TOOLS_DIR}/caf-build-agent/components/build-actions"
+ENV TOOLS_DIR="/usr/local/opt" 
 
 RUN mkdir -p ${TOOLS_DIR}/caf-build-agent
 WORKDIR ${TOOLS_DIR}/caf-build-agent/
@@ -63,10 +52,9 @@ ARG GIT_USERNAME \
     GIT_TOKEN \
     GIT_SERVER_URL \
     GIT_ORGANIZATION \
-    TOOLS_DIR="/usr/local/opt"
+    GIT_EMAIL_DOMAIN
 
-ENV TOOLS_DIR="${TOOLS_DIR}" \
-    BUILD_ACTIONS_DIR="${TOOLS_DIR}/caf-build-agent/components/build-actions"
+ENV BUILD_ACTIONS_DIR="${TOOLS_DIR}/caf-build-agent/components/build-actions"
 
 # Install CAF
 
@@ -76,7 +64,7 @@ RUN git clone "https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_SERVER_URL}/${GIT_ORGA
 
 ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${TOOLS_DIR}/.asdf:${BUILD_ACTIONS_DIR}" \
     JOB_NAME="${GIT_USERNAME}" \
-    JOB_EMAIL="${GIT_USERNAME}@example.com" \
+    JOB_EMAIL="${GIT_USERNAME}@${GIT_EMAIL_DOMAIN}" \
     IS_PIPELINE=true \
     IS_AUTHENTICATED=true
 
