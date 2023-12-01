@@ -42,7 +42,15 @@ RUN mkdir -p ${TOOLS_DIR}/caf-build-agent
 WORKDIR ${TOOLS_DIR}/caf-build-agent/
 COPY ./.tool-versions ${TOOLS_DIR}/caf-build-agent/.tool-versions
 COPY ./asdf-setup.sh ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh
-RUN ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh
+ENV PATH="$PATH:$HOME/.asdf"
+
+# TODO: Move this to asdf
+# launch-cli
+RUN ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh \
+    && git clone "https://github.com/nexient-llc/launch-cli" "${TOOLS_DIR}/launch-cli" \
+    && cd "${TOOLS_DIR}/launch-cli" \
+    && pip install semver \
+    && pip install .
 
 ### End of target: tools  ### 
 
@@ -62,7 +70,7 @@ RUN git clone "https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_SERVER_URL}/${GIT_ORGA
     && cd "${TOOLS_DIR}/git-repo" \
     && chmod +x "repo"
 
-ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${TOOLS_DIR}/.asdf:${BUILD_ACTIONS_DIR}" \
+ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${BUILD_ACTIONS_DIR}" \
     JOB_NAME="${GIT_USERNAME}" \
     JOB_EMAIL="${GIT_USERNAME}@${GIT_EMAIL_DOMAIN}" \
     IS_PIPELINE=true \

@@ -15,7 +15,7 @@ asdf global golang 1.20.8
 asdf global golangci-lint 1.53.3
 asdf global opa 0.53.1
 asdf global pre-commit 3.3.3
-asdf global python 3.11.4
+asdf global python 3.11.5
 asdf global regula 3.2.1
 asdf global semverbot 1.3.2
 asdf global terraform 1.5.5
