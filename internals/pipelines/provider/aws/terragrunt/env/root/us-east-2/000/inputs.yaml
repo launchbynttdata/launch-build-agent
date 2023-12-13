@@ -1,13 +1,13 @@
 git_tag: 0.1.0
 null_resource_aws_profile: "launch-root-admin"
-build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:dev"
+build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:1.0.0"
 build_image_pull_credentials_type: "SERVICE_ROLE"
 additional_codebuild_projects:
   - name: "trigger_pipeline"
     buildspec: "buildspec.yml"
     source_type: "NO_SOURCE"
     artifact_type: "NO_ARTIFACTS"
-    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:dev"
+    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:1.0.0""
     build_image_pull_credentials_type: "SERVICE_ROLE"
     environment_variables:
       - name: "CAF_CODEBUILD_ACTION"
