@@ -1,0 +1,5 @@
+# Container-specific variables:
+CONTAINER_REGISTRY ?= 538234414982.dkr.ecr.us-east-2.amazonaws.com
+CONTAINER_IMAGE_NAME ?= caf-build-agent
+DOCKER_BUILD_ARCH ?= linux/amd64
+BUILD_ARGS ?= --build-arg GIT_USERNAME="$(shell echo $$GIT_USERNAME)" --build-arg GIT_TOKEN="$(shell echo $$GIT_TOKEN)" --build-arg GIT_SERVER_URL="$(shell echo $$GIT_SERVER_URL | sed 's@https://@@g')" --build-arg GIT_ORG="$(shell echo $$GIT_ORG)" --progress plain

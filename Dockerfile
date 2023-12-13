@@ -34,7 +34,7 @@ RUN rm -fr /tmp/* /var/tmp/*
 # Python
 RUN set -ex \
     && pip3 install --no-cache-dir --upgrade --force-reinstall pip \
-    && pip3 install --no-cache-dir --upgrade PyYAML setuptools wheel awscli pre-commit
+    && pip3 install --no-cache-dir --upgrade PyYAML setuptools wheel pre-commit
 
 ENV TOOLS_DIR="/usr/local/opt" 
 
@@ -42,15 +42,10 @@ RUN mkdir -p ${TOOLS_DIR}/caf-build-agent
 WORKDIR ${TOOLS_DIR}/caf-build-agent/
 COPY ./.tool-versions ${TOOLS_DIR}/caf-build-agent/.tool-versions
 COPY ./asdf-setup.sh ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh
-ENV PATH="$PATH:$HOME/.asdf"
+ENV PATH="$PATH:/root/.asdf"
 
-# TODO: Move this to asdf
-# launch-cli
 RUN ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh \
-    && git clone "https://github.com/nexient-llc/launch-cli" "${TOOLS_DIR}/launch-cli" \
-    && cd "${TOOLS_DIR}/launch-cli" \
-    && pip install semver \
-    && pip install .
+    && pip install 'git+https://github.com/nexient-llc/launch-cli.git#egg=launch'
 
 ### End of target: tools  ### 
 
@@ -59,21 +54,24 @@ FROM tools AS caf
 ARG GIT_USERNAME \
     GIT_TOKEN \
     GIT_SERVER_URL \
-    GIT_ORGANIZATION \
+    GIT_ORG \
     GIT_EMAIL_DOMAIN
 
 ENV BUILD_ACTIONS_DIR="${TOOLS_DIR}/caf-build-agent/components/build-actions"
 
 # Install CAF
 
-RUN git clone "https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_SERVER_URL}/${GIT_ORGANIZATION}/git-repo.git" "${TOOLS_DIR}/git-repo" \
+RUN git clone "https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_SERVER_URL}/${GIT_ORG}/git-repo.git" "${TOOLS_DIR}/git-repo" \
     && cd "${TOOLS_DIR}/git-repo" \
     && chmod +x "repo"
 
 ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${BUILD_ACTIONS_DIR}" \
     JOB_NAME="${GIT_USERNAME}" \
     JOB_EMAIL="${GIT_USERNAME}@${GIT_EMAIL_DOMAIN}" \
-    IS_PIPELINE=true \
+    PIPELINES_VER="refs/tags/0.1.1" \
+    CONTAINER_VER="refs/tags/0.1.1"
+
+ENV IS_PIPELINE=true \
     IS_AUTHENTICATED=true
 
 COPY "./Makefile" "${TOOLS_DIR}/caf-build-agent/Makefile"

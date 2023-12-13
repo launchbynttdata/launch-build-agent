@@ -1,0 +1,675 @@
+git_tag: 0.1.0
+null_resource_aws_profile: "launch-root-admin"
+build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:dev"
+build_image_pull_credentials_type: "SERVICE_ROLE"
+additional_codebuild_projects:
+  - name: "trigger_pipeline"
+    buildspec: "buildspec.yml"
+    source_type: "NO_SOURCE"
+    artifact_type: "NO_ARTIFACTS"
+    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:dev"
+    build_image_pull_credentials_type: "SERVICE_ROLE"
+    environment_variables:
+      - name: "CAF_CODEBUILD_ACTION"
+        value: "trigger-pipeline"
+        type: "PLAINTEXT"
+      - name: "IGNORE_INTERNALS"
+        value: "true"
+        type: "PLAINTEXT"
+      - name: "GIT_TOKEN"
+        value: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token"
+        type: "SECRETS_MANAGER"
+      - name: "GIT_USERNAME"
+        value: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username"
+        type: "SECRETS_MANAGER"
+    codebuild_iam: |
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Action": [
+              "s3:PutObject",
+              "s3:GetObjectAcl",
+              "s3:GetObject",
+              "s3:ListBucketMultipartUploads",
+              "s3:ListBucketVersions",
+              "s3:ListBucket",
+              "s3:DeleteObject",
+              "s3:PutObjectAcl",
+              "s3:ListMultipartUploadParts"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:s3:::caf-agent-pr-event-useast2-root-000-s3-000",
+              "arn:aws:s3:::caf-agent-pr-event-useast2-root-000-s3-000/*",
+              "arn:aws:s3:::caf-agent-pr-merge-useast2-root-000-s3-000",
+              "arn:aws:s3:::caf-agent-pr-merge-useast2-root-000-s3-000/*"
+            ]
+          },
+          {
+            "Action": [
+              "ecr:GetAuthorizationToken",
+              "ecr:BatchCheckLayerAvailability",
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          },
+          {
+            "Action": [
+              "kms:Decrypt",
+              "kms:DescribeKey"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+          },
+          {
+            "Action": ["secretsmanager:GetSecretValue"],
+            "Effect": "Allow",
+            "Resource": [
+              "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+              "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+            ]
+          }
+        ]
+      }
+pipelines:
+  - name: "internals"
+    pipelineType: "V2"
+    create_s3_source: true
+    source_stage:
+      stage_name: "Source"
+      name: "Source"
+      category: "Source"
+      provider: "S3"
+      configuration:
+        S3ObjectKey: "trigger_pipeline.zip"
+        PollForSourceChanges: "false"
+      output_artifacts: ["SourceArtifact"]
+    stages:
+      - stage_name: "TG-Plan-Git-Webhooks"
+        name: "TG-Plan-Git-Webhooks"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "plan_hooks"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+              {
+                "name":"CAF_CODEBUILD_ACTION",
+                "value":"terragrunt-plan",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"GIT_TOKEN_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"GIT_USERNAME_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"INTERNALS_PIPELINE",
+                "value":"true",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"INTERNALS_SERVICE",
+                "value":"gitwebhook-handlers",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"TARGETENV",
+                "value":"root",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"ROLE_TO_ASSUME",
+                "value":"arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                "type":"PLAINTEXT"
+              }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }
+      - stage_name: "TG-Plan-Pipelines"
+        name: "TG-Plan-Pipelines"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "plan_pipeln"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+              {
+                "name":"CAF_CODEBUILD_ACTION",
+                "value":"terragrunt-plan",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"GIT_TOKEN_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"GIT_USERNAME_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"INTERNALS_PIPELINE",
+                "value":"true",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"INTERNALS_SERVICE",
+                "value":"pipelines",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"TARGETENV",
+                "value":"root",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"ROLE_TO_ASSUME",
+                "value":"arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                "type":"PLAINTEXT"
+              }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }
+      - stage_name: "Deploy-Git-Webhooks"
+        name: "Deploy-Git-Webhooks"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "deploy_hooks"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+              {
+                "name":"CAF_CODEBUILD_ACTION",
+                "value":"terragrunt-deploy",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"GIT_TOKEN_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"GIT_USERNAME_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"INTERNALS_PIPELINE",
+                "value":"true",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"INTERNALS_SERVICE",
+                "value":"gitwebhook-handlers",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"TARGETENV",
+                "value":"root",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"ROLE_TO_ASSUME",
+                "value":"arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                "type":"PLAINTEXT"
+              }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }
+      - stage_name: "Deploy-Pipelines"
+        name: "Deploy-Pipelines"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "deploy_pipeln"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+              {
+                "name":"CAF_CODEBUILD_ACTION",
+                "value":"terragrunt-deploy",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"GIT_TOKEN_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"GIT_USERNAME_SM_ARN",
+                "value":"arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                "type":"SECRETS_MANAGER"
+              },
+              {
+                "name":"INTERNALS_PIPELINE",
+                "value":"true",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"INTERNALS_SERVICE",
+                "value":"pipelines",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"TARGETENV",
+                "value":"root",
+                "type":"PLAINTEXT"
+              },
+              {
+                "name":"ROLE_TO_ASSUME",
+                "value":"arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                "type":"PLAINTEXT"
+              }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }
+  - name: "pr_event"
+    pipelineType: "V2"
+    create_s3_source: true
+    source_stage:
+      stage_name: "Source"
+      name: "Source"
+      category: "Source"
+      provider: "S3"
+      configuration:
+        S3ObjectKey: "trigger_pipeline.zip"
+        PollForSourceChanges: "false"
+      output_artifacts: ["SourceArtifact"]
+    stages:
+      - stage_name: "Launch-Predict-SemVer"
+        name: "Launch-Predict-SemVer"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "semver_predict"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+                {
+                    "name": "CAF_CODEBUILD_ACTION",
+                    "value": "launch-predict-semver",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "GIT_TOKEN",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "GIT_USERNAME",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "TARGETENV",
+                    "value": "root",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "ROLE_TO_ASSUME",
+                    "value": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                    "type": "PLAINTEXT"
+                }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }
+      - stage_name: "Docker-Build"
+        name: "Docker-Build"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "docker_build"
+        buildspec: "buildspec.yml"
+        privileged_mode: true
+        configuration:
+          EnvironmentVariables: |
+            [
+                {
+                    "name": "CAF_CODEBUILD_ACTION",
+                    "value": "build-container",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "GIT_TOKEN",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "GIT_USERNAME",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "TARGETENV",
+                    "value": "root",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "ROLE_TO_ASSUME",
+                    "value": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                    "type": "PLAINTEXT"
+                }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }
+  - name: "pr_merge"
+    pipelineType: "V2"
+    create_s3_source: true
+    source_stage:
+      stage_name: "Source"
+      name: "Source"
+      category: "Source"
+      provider: "S3"
+      configuration:
+        S3ObjectKey: "trigger_pipeline.zip"
+        PollForSourceChanges: "false"
+      output_artifacts: ["SourceArtifact"]
+    stages:
+      - stage_name: "Docker-Push-ECR"
+        name: "Docker-Push-ECR"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "docker_push"
+        buildspec: "buildspec.yml"
+        privileged_mode: true
+        configuration:
+          EnvironmentVariables: |
+            [
+                {
+                    "name": "CAF_CODEBUILD_ACTION",
+                    "value": "push-container",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "GIT_TOKEN",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "GIT_USERNAME",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "TARGETENV",
+                    "value": "root",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "ROLE_TO_ASSUME",
+                    "value": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                    "type": "PLAINTEXT"
+                }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              },
+              {
+                "Action": [
+                  "ecr:BatchGetImage",
+                  "ecr:BatchCheckLayerAvailability",
+                  "ecr:CompleteLayerUpload",
+                  "ecr:GetDownloadUrlForLayer",
+                  "ecr:InitiateLayerUpload",
+                  "ecr:PutImage",
+                  "ecr:UploadLayerPart"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              }
+            ]
+          }
+      - stage_name: "Launch-Apply-SemVer"
+        name: "Launch-Apply-SemVer"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "semver_apply"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+                {
+                    "name": "CAF_CODEBUILD_ACTION",
+                    "value": "launch-apply-semver",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "GIT_TOKEN",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "GIT_USERNAME",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "TARGETENV",
+                    "value": "root",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "ROLE_TO_ASSUME",
+                    "value": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                    "type": "PLAINTEXT"
+                }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              }
+            ]
+          }

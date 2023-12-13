@@ -1,6 +1,6 @@
 #!/bin/bash
 GIT_SERVER_URL=github.com
-GIT_ORGANIZATION=nexient-llc
+GIT_ORG=nexient-llc
 GIT_USERNAME=foo # Your Bitbucket username here
 GIT_TOKEN=bar # Your Bitbucket access token here
 
@@ -10,7 +10,7 @@ docker buildx build \
     --build-arg GIT_USERNAME="${GIT_USERNAME}" \
     --build-arg GIT_TOKEN="${GIT_TOKEN}" \
     --build-arg GIT_SERVER_URL="${GIT_SERVER_URL}" \
-    --build-arg GIT_ORGANIZATION="${GIT_ORGANIZATION}" \
+    --build-arg GIT_ORG="${GIT_ORG}" \
     --file ./Dockerfile . \
     --no-cache-filter caf \
     --platform linux/amd64 \

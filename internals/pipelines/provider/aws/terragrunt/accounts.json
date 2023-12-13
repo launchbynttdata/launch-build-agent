@@ -1,0 +1,5 @@
+{
+  "root": "launch-root-admin",
+  "prod": "launch-prod-admin",
+  "sandbox": "launch-sandbox-admin"
+}
