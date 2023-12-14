@@ -7,7 +7,7 @@ additional_codebuild_projects:
     buildspec: "buildspec.yml"
     source_type: "NO_SOURCE"
     artifact_type: "NO_ARTIFACTS"
-    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:1.0.0""
+    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:1.0.0"
     build_image_pull_credentials_type: "SERVICE_ROLE"
     environment_variables:
       - name: "CAF_CODEBUILD_ACTION"
@@ -604,6 +604,77 @@ pipelines:
                   "ecr:InitiateLayerUpload",
                   "ecr:PutImage",
                   "ecr:UploadLayerPart"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              }
+            ]
+          }
+      - stage_name: "Tag-Container"
+        name: "Tag-Container"
+        category: "Build"
+        provider: "CodeBuild"
+        project_name: "tag"
+        buildspec: "buildspec.yml"
+        configuration:
+          EnvironmentVariables: |
+            [
+                {
+                    "name": "CAF_CODEBUILD_ACTION",
+                    "value": "tag-container",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "GIT_TOKEN",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "GIT_USERNAME",
+                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
+                    "type": "SECRETS_MANAGER"
+                },
+                {
+                    "name": "TARGETENV",
+                    "value": "root",
+                    "type": "PLAINTEXT"
+                },
+                {
+                    "name": "ROLE_TO_ASSUME",
+                    "value": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000",
+                    "type": "PLAINTEXT"
+                }
+            ]
+        input_artifacts: ["SourceArtifact"]
+        codebuild_iam: |
+          {
+            "Version": "2012-10-17",
+            "Statement": [
+              {
+                "Action": [
+                  "kms:Decrypt",
+                  "kms:DescribeKey"
+                ],
+                "Effect": "Allow",
+                "Resource": "*"
+              },
+              {
+                "Action": ["secretsmanager:GetSecretValue"],
+                "Effect": "Allow",
+                "Resource": [
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
+                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
+                ]
+              },
+              {
+                "Action": ["sts:AssumeRole"],
+                "Effect": "Allow",
+                "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
+              },
+              {
+                "Action": [
+                  "ecr:BatchGetImage",
+                  "ecr:PutImage"
                 ],
                 "Effect": "Allow",
                 "Resource": "*"
