@@ -42,7 +42,7 @@ Example of CodeBuild Stage
     buildspec: "buildspec.yml"
     configuration:
       EnvironmentVariables: |
-        [{"name":"CAF_CODEBUILD_ACTION","value":"terragrunt_deploy","type":"PLAINTEXT"},{"name":"GIT_TOKEN_SM_ARN","value":"arn:aws:secretsmanager:us-east-2:123456789012:secret:bitbucket/http_access_token","type":"PLAINTEXT"},{"name":"GIT_USER_SM_ARN","value":"arn:aws:secretsmanager:us-east-2:123456789012:secret:bitbucket/service_user","type":"PLAINTEXT"},{"name":"TARGETENV","value":"qa","type":"PLAINTEXT"},{"name":"ROLE_TO_ASSUME","value":"arn:aws:iam::123456789012:role/platform_tg_iam-useast2-qa-000-deploy_role-000","type":"PLAINTEXT"}]
+        [{"name":"LAUNCH_ACTION","value":"terragrunt_deploy","type":"PLAINTEXT"},{"name":"GIT_TOKEN_SM_ARN","value":"arn:aws:secretsmanager:us-east-2:123456789012:secret:bitbucket/http_access_token","type":"PLAINTEXT"},{"name":"GIT_USER_SM_ARN","value":"arn:aws:secretsmanager:us-east-2:123456789012:secret:bitbucket/service_user","type":"PLAINTEXT"},{"name":"TARGETENV","value":"qa","type":"PLAINTEXT"},{"name":"ROLE_TO_ASSUME","value":"arn:aws:iam::123456789012:role/platform_tg_iam-useast2-qa-000-deploy_role-000","type":"PLAINTEXT"}]
     input_artifacts: ["SourceArtifact"]
     codebuild_iam: |
       {

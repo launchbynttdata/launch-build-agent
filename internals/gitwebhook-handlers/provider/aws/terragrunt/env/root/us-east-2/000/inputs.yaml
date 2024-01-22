@@ -12,14 +12,14 @@ bulk_lambda_functions:
           "TO_BRANCH": "pull_request.base.ref",
           "MERGE_COMMIT_ID": "pull_request.head.sha"
         }
-      CODEBUILD_PROJECT_NAME: "caf-agent_trigger_pipeline-useast2-root-000-cb-000"
+      CODEBUILD_PROJECT_NAME: "build-agent_trigger_pipeline-useast2-root-000-cb-000"
       CODEBUILD_URL: "https://us-east-2.console.aws.amazon.com/codesuite/codebuild/projects?region=us-east-2"
       GIT_SERVER_URL: "https://github.com"
       GIT_SECRET_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:github/nexient-llc/tf-aws-common-pipeline/git_secret"
       GIT_TOKEN_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token"
       GIT_USERNAME_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username"
       LOGGING_LEVEL: "INFO"
-      USERVAR_S3_CODEPIPELINE_BUCKET: "caf-agent-pr-event-useast2-root-000-s3-000"
+      USERVAR_S3_CODEPIPELINE_BUCKET: "build-agent-pr-event-useast2-root-000-s3-000"
       VALIDATE_DIGITAL_SIGNATURE: "false"
       WEBHOOK_EVENT_TYPE: "opened"
     attach_policy_json: true
@@ -67,14 +67,14 @@ bulk_lambda_functions:
           "TO_BRANCH": "pull_request.base.ref",
           "MERGE_COMMIT_ID": "pull_request.merge_commit_sha"
         }
-      CODEBUILD_PROJECT_NAME: "caf-agent_trigger_pipeline-useast2-root-000-cb-000"
+      CODEBUILD_PROJECT_NAME: "build-agent_trigger_pipeline-useast2-root-000-cb-000"
       CODEBUILD_URL: "https://us-east-2.console.aws.amazon.com/codesuite/codebuild/projects?region=us-east-2"
       GIT_SERVER_URL: "https://github.com"
       GIT_SECRET_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:github/nexient-llc/tf-aws-common-pipeline/git_secret"
       GIT_TOKEN_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token"
       GIT_USERNAME_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username"
       LOGGING_LEVEL: "INFO"
-      USERVAR_S3_CODEPIPELINE_BUCKET: "caf-agent-pr-merge-useast2-root-000-s3-000"
+      USERVAR_S3_CODEPIPELINE_BUCKET: "build-agent-pr-merge-useast2-root-000-s3-000"
       VALIDATE_DIGITAL_SIGNATURE: "false"
       WEBHOOK_EVENT_TYPE: "closed"
     attach_policy_json: true
@@ -122,14 +122,14 @@ bulk_lambda_functions:
           "TO_BRANCH": "pull_request.base.ref",
           "MERGE_COMMIT_ID": "pull_request.head.sha"
         }
-      CODEBUILD_PROJECT_NAME: "caf-agent_trigger_pipeline-useast2-root-000-cb-000"
+      CODEBUILD_PROJECT_NAME: "build-agent_trigger_pipeline-useast2-root-000-cb-000"
       CODEBUILD_URL: "https://us-east-2.console.aws.amazon.com/codesuite/codebuild/projects?region=us-east-2"
       GIT_SERVER_URL: "https://github.com"
       GIT_SECRET_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:github/nexient-llc/tf-aws-common-pipeline/git_secret"
       GIT_TOKEN_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token"
       GIT_USERNAME_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username"
       LOGGING_LEVEL: "INFO"
-      USERVAR_S3_CODEPIPELINE_BUCKET: "caf-agent-pr-event-useast2-root-000-s3-000"
+      USERVAR_S3_CODEPIPELINE_BUCKET: "build-agent-pr-event-useast2-root-000-s3-000"
       VALIDATE_DIGITAL_SIGNATURE: "false"
       WEBHOOK_EVENT_TYPE: "edited"
     attach_policy_json: true
@@ -177,14 +177,14 @@ bulk_lambda_functions:
           "TO_BRANCH": "pull_request.base.ref",
           "MERGE_COMMIT_ID": "pull_request.head.sha"
         }
-      CODEBUILD_PROJECT_NAME: "caf-agent_trigger_pipeline-useast2-root-000-cb-000"
+      CODEBUILD_PROJECT_NAME: "build-agent_trigger_pipeline-useast2-root-000-cb-000"
       CODEBUILD_URL: "https://us-east-2.console.aws.amazon.com/codesuite/codebuild/projects?region=us-east-2"
       GIT_SERVER_URL: "https://github.com"
       GIT_SECRET_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:github/nexient-llc/tf-aws-common-pipeline/git_secret"
       GIT_TOKEN_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token"
       GIT_USERNAME_SM_ARN: "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username"
       LOGGING_LEVEL: "INFO"
-      USERVAR_S3_CODEPIPELINE_BUCKET: "caf-agent-pr-event-useast2-root-000-s3-000"
+      USERVAR_S3_CODEPIPELINE_BUCKET: "build-agent-pr-event-useast2-root-000-s3-000"
       VALIDATE_DIGITAL_SIGNATURE: "false"
       WEBHOOK_EVENT_TYPE: "synchronize"
     attach_policy_json: true

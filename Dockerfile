@@ -38,18 +38,18 @@ RUN set -ex \
 
 ENV TOOLS_DIR="/usr/local/opt" 
 
-RUN mkdir -p ${TOOLS_DIR}/caf-build-agent
-WORKDIR ${TOOLS_DIR}/caf-build-agent/
-COPY ./.tool-versions ${TOOLS_DIR}/caf-build-agent/.tool-versions
-COPY ./asdf-setup.sh ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh
+RUN mkdir -p ${TOOLS_DIR}/launch-build-agent
+WORKDIR ${TOOLS_DIR}/launch-build-agent/
+COPY ./.tool-versions ${TOOLS_DIR}/launch-build-agent/.tool-versions
+COPY ./asdf-setup.sh ${TOOLS_DIR}/launch-build-agent/asdf-setup.sh
 ENV PATH="$PATH:/root/.asdf"
 
-RUN ${TOOLS_DIR}/caf-build-agent/asdf-setup.sh \
-    && pip install 'git+https://github.com/nexient-llc/launch-cli.git#egg=launch'
+RUN ${TOOLS_DIR}/launch-build-agent/asdf-setup.sh \
+    && pip install launch-cli
 
 ### End of target: tools  ### 
 
-FROM tools AS caf
+FROM tools AS lcaf
 
 ARG GIT_USERNAME \
     GIT_TOKEN \
@@ -57,9 +57,9 @@ ARG GIT_USERNAME \
     GIT_ORG \
     GIT_EMAIL_DOMAIN
 
-ENV BUILD_ACTIONS_DIR="${TOOLS_DIR}/caf-build-agent/components/build-actions"
+ENV BUILD_ACTIONS_DIR="${TOOLS_DIR}/launch-build-agent/components/build-actions"
 
-# Install CAF
+# Install LCAF
 
 RUN git clone "https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_SERVER_URL}/${GIT_ORG}/git-repo.git" "${TOOLS_DIR}/git-repo" \
     && cd "${TOOLS_DIR}/git-repo" \
@@ -74,12 +74,12 @@ ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${BUILD_ACTIONS_DIR}" \
 ENV IS_PIPELINE=true \
     IS_AUTHENTICATED=true
 
-COPY "./Makefile" "${TOOLS_DIR}/caf-build-agent/Makefile"
+COPY "./Makefile" "${TOOLS_DIR}/launch-build-agent/Makefile"
 
-RUN cd /usr/local/opt/caf-build-agent \
+RUN cd /usr/local/opt/launch-build-agent \
     && make git-config \
     && make git-auth \
     && make configure \ 
     && rm -rf $HOME/.gitconfig
 
-### End of target: caf  ###
+### End of target: lcaf  ###

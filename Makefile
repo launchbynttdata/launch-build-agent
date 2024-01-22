@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# Include custom values from .cafenv. Repository root is assumed to be the working directory.
+# Include custom values from .lcafenv. Repository root is assumed to be the working directory.
 # Including overriding values in this file is preferred over modifying the contents below.
-CAF_ENV_FILE = .cafenv
--include $(CAF_ENV_FILE)
+LCAF_ENV_FILE = .lcafenv
+-include $(LCAF_ENV_FILE)
 
 # Source repository for repo manifests
 REPO_MANIFESTS_URL ?= https://github.com/nexient-llc/common-automation-framework.git

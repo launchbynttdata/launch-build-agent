@@ -1,16 +1,16 @@
 git_tag: 0.1.0
 null_resource_aws_profile: "launch-root-admin"
-build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:1.0.0"
+build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/launch-build-agent:1.0.0"
 build_image_pull_credentials_type: "SERVICE_ROLE"
 additional_codebuild_projects:
   - name: "trigger_pipeline"
     buildspec: "buildspec.yml"
     source_type: "NO_SOURCE"
     artifact_type: "NO_ARTIFACTS"
-    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/caf-build-agent:1.0.0"
+    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/launch-build-agent:1.0.0"
     build_image_pull_credentials_type: "SERVICE_ROLE"
     environment_variables:
-      - name: "CAF_CODEBUILD_ACTION"
+      - name: "LAUNCH_ACTION"
         value: "trigger-pipeline"
         type: "PLAINTEXT"
       - name: "IGNORE_INTERNALS"
@@ -40,10 +40,10 @@ additional_codebuild_projects:
             ],
             "Effect": "Allow",
             "Resource": [
-              "arn:aws:s3:::caf-agent-pr-event-useast2-root-000-s3-000",
-              "arn:aws:s3:::caf-agent-pr-event-useast2-root-000-s3-000/*",
-              "arn:aws:s3:::caf-agent-pr-merge-useast2-root-000-s3-000",
-              "arn:aws:s3:::caf-agent-pr-merge-useast2-root-000-s3-000/*"
+              "arn:aws:s3:::build-agent-pr-event-useast2-root-000-s3-000",
+              "arn:aws:s3:::build-agent-pr-event-useast2-root-000-s3-000/*",
+              "arn:aws:s3:::build-agent-pr-merge-useast2-root-000-s3-000",
+              "arn:aws:s3:::build-agent-pr-merge-useast2-root-000-s3-000/*"
             ]
           },
           {
@@ -98,7 +98,7 @@ pipelines:
           EnvironmentVariables: |
             [
               {
-                "name":"CAF_CODEBUILD_ACTION",
+                "name":"LAUNCH_ACTION",
                 "value":"terragrunt-plan",
                 "type":"PLAINTEXT"
               },
@@ -171,7 +171,7 @@ pipelines:
           EnvironmentVariables: |
             [
               {
-                "name":"CAF_CODEBUILD_ACTION",
+                "name":"LAUNCH_ACTION",
                 "value":"terragrunt-plan",
                 "type":"PLAINTEXT"
               },
@@ -244,7 +244,7 @@ pipelines:
           EnvironmentVariables: |
             [
               {
-                "name":"CAF_CODEBUILD_ACTION",
+                "name":"LAUNCH_ACTION",
                 "value":"terragrunt-deploy",
                 "type":"PLAINTEXT"
               },
@@ -317,7 +317,7 @@ pipelines:
           EnvironmentVariables: |
             [
               {
-                "name":"CAF_CODEBUILD_ACTION",
+                "name":"LAUNCH_ACTION",
                 "value":"terragrunt-deploy",
                 "type":"PLAINTEXT"
               },
@@ -403,7 +403,7 @@ pipelines:
           EnvironmentVariables: |
             [
                 {
-                    "name": "CAF_CODEBUILD_ACTION",
+                    "name": "LAUNCH_ACTION",
                     "value": "launch-predict-semver",
                     "type": "PLAINTEXT"
                 },
@@ -467,7 +467,7 @@ pipelines:
           EnvironmentVariables: |
             [
                 {
-                    "name": "CAF_CODEBUILD_ACTION",
+                    "name": "LAUNCH_ACTION",
                     "value": "build-container",
                     "type": "PLAINTEXT"
                 },
@@ -544,7 +544,7 @@ pipelines:
           EnvironmentVariables: |
             [
                 {
-                    "name": "CAF_CODEBUILD_ACTION",
+                    "name": "LAUNCH_ACTION",
                     "value": "push-container",
                     "type": "PLAINTEXT"
                 },
@@ -620,7 +620,7 @@ pipelines:
           EnvironmentVariables: |
             [
                 {
-                    "name": "CAF_CODEBUILD_ACTION",
+                    "name": "LAUNCH_ACTION",
                     "value": "tag-container",
                     "type": "PLAINTEXT"
                 },
@@ -691,7 +691,7 @@ pipelines:
           EnvironmentVariables: |
             [
                 {
-                    "name": "CAF_CODEBUILD_ACTION",
+                    "name": "LAUNCH_ACTION",
                     "value": "launch-apply-semver",
                     "type": "PLAINTEXT"
                 },
