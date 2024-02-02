@@ -77,7 +77,6 @@ COPY "./Makefile" "${TOOLS_DIR}/launch-build-agent/Makefile"
 
 RUN cd /usr/local/opt/launch-build-agent \
     && make git-config \
-    && make git-auth \
     && make configure \ 
     && rm -rf $HOME/.gitconfig
 
