@@ -71,8 +71,7 @@ ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${BUILD_ACTIONS_DIR}" \
     PIPELINES_VER="refs/tags/0.1.1" \
     CONTAINER_VER="refs/tags/0.1.1"
 
-ENV IS_PIPELINE=true \
-    IS_AUTHENTICATED=true
+ENV IS_PIPELINE=true
 
 COPY "./Makefile" "${TOOLS_DIR}/launch-build-agent/Makefile"
 
