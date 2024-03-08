@@ -19,7 +19,7 @@ LCAF_ENV_FILE = .lcafenv
 REPO_MANIFESTS_URL ?= https://github.com/nexient-llc/common-automation-framework.git
 # Branch of source repository for repo manifests. Other tags not currently supported.
 # TODO: replace with git tag when supported
-REPO_BRANCH ?= main
+REPO_BRANCH ?= refs/tags/0.3.0
 # Path to seed manifest in repository referenced in REPO_MANIFESTS_URL
 REPO_MANIFEST ?= manifests/containers/aws/build_agents/shared_service/terraform/seed/manifest.xml
 
