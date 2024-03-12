@@ -68,7 +68,7 @@ RUN git clone "https://${GIT_USERNAME}:${GIT_TOKEN}@${GIT_SERVER_URL}/${GIT_ORG}
 ENV PATH="$PATH:${TOOLS_DIR}/git-repo:${BUILD_ACTIONS_DIR}" \
     JOB_NAME="${GIT_USERNAME}" \
     JOB_EMAIL="${GIT_USERNAME}@${GIT_EMAIL_DOMAIN}" \
-    PIPELINES_VER="refs/tags/0.1.3" \
+    PIPELINES_VER="refs/tags/0.1.4" \
     CONTAINER_VER="refs/tags/0.2.0"
 
 ENV IS_PIPELINE=true
