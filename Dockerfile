@@ -14,9 +14,9 @@ RUN set -ex \
 # Set up SSH for git and bitbucket
 RUN mkdir -p ~/.ssh \
     && touch ~/.ssh/known_hosts \
-    && ssh-keyscan -t rsa,dsa,ed25519,ecdsa -H github.com >> ~/.ssh/known_hosts \
-    && ssh-keyscan -t rsa,dsa,ed25519,ecdsa -H bitbucket.org >> ~/.ssh/known_hosts \
-    && chmod 600 ~/.ssh/known_hosts
+    && chmod 600 ~/.ssh/known_hosts \
+    ; ssh-keyscan -t rsa,dsa,ed25519,ecdsa -H github.com >> ~/.ssh/known_hosts || true \
+    ; ssh-keyscan -t rsa,dsa,ed25519,ecdsa -H bitbucket.org >> ~/.ssh/known_hosts || true
 
 FROM core AS tools
 
