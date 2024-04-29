@@ -1,0 +1,43 @@
+trigger: 
+- 2.0.0
+
+resources:
+- repo: self
+
+variables:
+  serviceConnection: 'sandbox-nexientcloud-sn'
+  imageRepository: 'launch-build-agent'
+  containerRegistry: 'launchbuildagent.azurecr.io'
+  imageTag: '1.0.0'
+  dockerfilePath: '$(Build.SourcesDirectory)/Dockerfile'
+  tag: '$(Build.BuildId)'
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:  
+    - task: AzureCLI@2
+      inputs:
+        azureSubscription: $(serviceConnection)
+        scriptType: 'bash'
+        scriptLocation: 'inlineScript'
+        inlineScript: |
+          export GIT_SERVER_URL=github.com
+          export GIT_ORG=nexient-llc
+          export GIT_USERNAME=foo
+          export GIT_TOKEN=bar
+          az acr login --name $(containerRegistry)
+          docker build \
+            -t $(containerRegistry)/$(imageRepository):$(tag) --file $(dockerfilePath) . \
+            --build-arg GIT_USERNAME="${GIT_USERNAME}" \
+            --build-arg GIT_TOKEN="${GIT_TOKEN}" \
+            --build-arg GIT_SERVER_URL="${GIT_SERVER_URL}" \
+            --build-arg GIT_ORG="${GIT_ORG}"
+          docker push $(containerRegistry)/$(imageRepository):$(tag)
+        addSpnToEnvironment: true

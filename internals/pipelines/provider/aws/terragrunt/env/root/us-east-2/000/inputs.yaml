@@ -1,13 +1,13 @@
 git_tag: 0.1.0
 null_resource_aws_profile: "launch-root-admin"
-build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/launch-build-agent:1.0.3"
+build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/launch-build-agent:1.0.0"
 build_image_pull_credentials_type: "SERVICE_ROLE"
 additional_codebuild_projects:
   - name: "trigger_pipeline"
     buildspec: "buildspec.yml"
     source_type: "NO_SOURCE"
     artifact_type: "NO_ARTIFACTS"
-    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/launch-build-agent:1.0.3"
+    build_image: "538234414982.dkr.ecr.us-east-2.amazonaws.com/launch-build-agent:1.0.0"
     build_image_pull_credentials_type: "SERVICE_ROLE"
     environment_variables:
       - name: "LAUNCH_ACTION"
@@ -741,74 +741,6 @@ pipelines:
                 "Action": ["sts:AssumeRole"],
                 "Effect": "Allow",
                 "Resource": "arn:aws:iam::538234414982:role/dso-demo_tg_iam-useast2-root-000-role-000"
-              }
-            ]
-          }
-      - stage_name: "Trigger-Env"
-        name: "Trigger-Env"
-        category: "Build"
-        provider: "CodeBuild"
-        project_name: "trigger_env"
-        buildspec: "buildspec.yml"
-        configuration:
-          EnvironmentVariables: |
-            [
-                {
-                    "name": "CAF_CODEBUILD_ACTION",
-                    "value": "trigger-pipeline",
-                    "type": "PLAINTEXT"
-                },
-                {
-                    "name": "GIT_TOKEN",
-                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token",
-                    "type": "SECRETS_MANAGER"
-                },
-                {
-                    "name": "GIT_USERNAME",
-                    "value": "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username",
-                    "type": "SECRETS_MANAGER"
-                },
-                {
-                    "name": "INTERNALS_CODEPIPELINE_BUCKET",
-                    "value": "build-agent-internals-useast2-root-000-s3-000",
-                    "type": "PLAINTEXT"
-                },
-                {
-                    "name": "USERVAR_S3_CODEPIPELINE_BUCKET",
-                    "value": "build-agent-internals-useast2-root-000-s3-000",
-                    "type": "PLAINTEXT"
-                },
-                {
-                    "name": "ROLE_TO_ASSUME",
-                    "value": "arn:aws:iam::020127659860:role/dso-demo_tg_iam-useast2-root-000-role-000",
-                    "type": "PLAINTEXT"
-                }
-            ]
-        input_artifacts: ["SourceArtifact"]
-        codebuild_iam: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Action": [
-                  "kms:Decrypt",
-                  "kms:DescribeKey"
-                ],
-                "Effect": "Allow",
-                "Resource": "*"
-              },
-              {
-                "Action": ["secretsmanager:GetSecretValue"],
-                "Effect": "Allow",
-                "Resource": [
-                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/http_access_token-??????",
-                  "arn:aws:secretsmanager:us-east-2:538234414982:secret:launch/dso-platform/github/service_user/username-??????"
-                ]
-              },
-              {
-                "Action": ["sts:AssumeRole"],
-                "Effect": "Allow",
-                "Resource": "arn:aws:iam::020127659860:role/dso-demo_tg_iam-useast2-root-000-role-000"
               }
             ]
           }
