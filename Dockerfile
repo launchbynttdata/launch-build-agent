@@ -87,8 +87,8 @@ WORKDIR /azp/
 
 COPY ./scripts/az-entry.sh  /azp/az-entry.sh
 
-RUN chmod +x /azp/az-entry.sh \
-    && curl -sL -o InstallAzureCLIDeb.sh https://aka.ms/InstallAzureCLIDeb \
+RUN chmod +x /azp/az-entry.sh
+RUN curl -sL -o InstallAzureCLIDeb.sh https://aka.ms/InstallAzureCLIDeb \
     && chmod +x InstallAzureCLIDeb.sh \
     && ./InstallAzureCLIDeb.sh \
     && rm -f InstallAzureCLIDeb.sh
